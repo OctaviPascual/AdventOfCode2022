@@ -1,15 +1,69 @@
 package day01
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
+func Test1(t *testing.T) {
+	input := `1000
+2000
+3000
+
+4000
+
+5000
+6000
+
+7000
+8000
+9000
+
+10000`
+	a := strings.Split(input, "\n")
+	for _, e := range a {
+		fmt.Printf("%q\n", e)
+	}
+}
+
 func TestNewDay(t *testing.T) {
-	expected := &Day{}
-	input := ``
+	expected := &Day{
+		elves: []elf{
+			{
+				items: []item{{calories: 1_000}, {calories: 2_000}, {calories: 3_000}},
+			},
+			{
+				items: []item{{calories: 4_000}},
+			},
+			{
+				items: []item{{calories: 5_000}, {calories: 6_000}},
+			},
+			{
+				items: []item{{calories: 7_000}, {calories: 8_000}, {calories: 9_000}},
+			},
+			{
+				items: []item{{calories: 10_000}},
+			},
+		},
+	}
+	input := `1000
+2000
+3000
+
+4000
+
+5000
+6000
+
+7000
+8000
+9000
+
+10000`
 	actual, err := NewDay(input)
 	require.NoError(t, err)
 
@@ -17,19 +71,55 @@ func TestNewDay(t *testing.T) {
 }
 
 func TestSolvePartOne(t *testing.T) {
-	day := &Day{}
+	day := &Day{
+		elves: []elf{
+			{
+				items: []item{{calories: 1_000}, {calories: 2_000}, {calories: 3_000}},
+			},
+			{
+				items: []item{{calories: 4_000}},
+			},
+			{
+				items: []item{{calories: 5_000}, {calories: 6_000}},
+			},
+			{
+				items: []item{{calories: 7_000}, {calories: 8_000}, {calories: 9_000}},
+			},
+			{
+				items: []item{{calories: 10_000}},
+			},
+		},
+	}
 
 	answer, err := day.SolvePartOne()
 	require.NoError(t, err)
 
-	assert.Equal(t, "", answer)
+	assert.Equal(t, "24000", answer)
 }
 
 func TestSolvePartTwo(t *testing.T) {
-	day := &Day{}
+	day := &Day{
+		elves: []elf{
+			{
+				items: []item{{calories: 1_000}, {calories: 2_000}, {calories: 3_000}},
+			},
+			{
+				items: []item{{calories: 4_000}},
+			},
+			{
+				items: []item{{calories: 5_000}, {calories: 6_000}},
+			},
+			{
+				items: []item{{calories: 7_000}, {calories: 8_000}, {calories: 9_000}},
+			},
+			{
+				items: []item{{calories: 10_000}},
+			},
+		},
+	}
 
 	answer, err := day.SolvePartTwo()
 	require.NoError(t, err)
 
-	assert.Equal(t, "", answer)
+	assert.Equal(t, "45000", answer)
 }
