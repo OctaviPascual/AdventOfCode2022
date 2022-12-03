@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 	"strings"
+
+	"github.com/OctaviPascual/AdventOfCode2022/day01"
 )
 
 // Day is the interface that wraps SolvePartOne and SolvePartTwo methods
