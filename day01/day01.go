@@ -6,7 +6,6 @@ import (
 	"strings"
 )
 
-// Day holds the data needed to solve part one and part two
 type Day struct {
 	elves []elf
 }
