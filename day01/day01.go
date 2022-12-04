@@ -32,13 +32,13 @@ func NewDay(input string) (*Day, error) {
 }
 
 // SolvePartOne solves part one
-func (d *Day) SolvePartOne() (string, error) {
+func (d Day) SolvePartOne() (string, error) {
 	maxCalories, _ := maxCalories(d.elves)
 	return fmt.Sprintf("%d", maxCalories), nil
 }
 
 // SolvePartTwo solves part two
-func (d *Day) SolvePartTwo() (string, error) {
+func (d Day) SolvePartTwo() (string, error) {
 	top1Calories, position := maxCalories(d.elves)
 	top2Calories, position := maxCalories(removeElf(d.elves, position))
 	top3Calories, _ := maxCalories(removeElf(d.elves, position))
