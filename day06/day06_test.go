@@ -37,7 +37,7 @@ func TestSolvePartTwo(t *testing.T) {
 	answer, err := day.SolvePartTwo()
 	require.NoError(t, err)
 
-	assert.Equal(t, "", answer)
+	assert.Equal(t, "19", answer)
 }
 
 func TestGetFirstStartOfPacketMarkerShould(t *testing.T) {
