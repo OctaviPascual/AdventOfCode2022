@@ -26,3 +26,11 @@ func Min[T constraints.Ordered](x, y T) T {
 	}
 	return y
 }
+
+// Set represents a set structure
+type Set[T comparable] map[T]struct{}
+
+// Add adds an element to the set
+func (s *Set[T]) Add(element T) {
+	(*s)[element] = struct{}{}
+}
