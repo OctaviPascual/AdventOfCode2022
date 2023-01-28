@@ -41,10 +41,14 @@ func TestSolvePartOne(t *testing.T) {
 }
 
 func TestSolvePartTwo(t *testing.T) {
-	day := &Day{}
+	day := &Day{
+		motions: []motion{
+			{right, 5}, {up, 8}, {left, 8}, {down, 3}, {right, 17}, {down, 10}, {left, 25}, {up, 20},
+		},
+	}
 
 	answer, err := day.SolvePartTwo()
 	require.NoError(t, err)
 
-	assert.Equal(t, "", answer)
+	assert.Equal(t, "36", answer)
 }

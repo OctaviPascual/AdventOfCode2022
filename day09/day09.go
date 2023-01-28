@@ -29,8 +29,7 @@ const (
 )
 
 type ropeBridge struct {
-	headPosition         position
-	tailPosition         position
+	knotsPosition        []position
 	tailVisitedPositions util.Set[position]
 }
 
@@ -54,14 +53,16 @@ func NewDay(input string) (*Day, error) {
 
 // SolvePartOne solves part one
 func (d Day) SolvePartOne() (string, error) {
-	ropeBridge := newRopeBridge()
+	ropeBridge := newRopeBridge(2)
 	ropeBridge.runSimulation(d.motions)
 	return fmt.Sprintf("%d", ropeBridge.totalTailVisitedPositions()), nil
 }
 
 // SolvePartTwo solves part two
 func (d Day) SolvePartTwo() (string, error) {
-	return "", nil
+	ropeBridge := newRopeBridge(10)
+	ropeBridge.runSimulation(d.motions)
+	return fmt.Sprintf("%d", ropeBridge.totalTailVisitedPositions()), nil
 }
 
 func parseMotions(motionsString []string) ([]motion, error) {
@@ -113,35 +114,37 @@ func parseDirection(directionString string) (direction, error) {
 	return "", fmt.Errorf("invalid direction: %s", directionString)
 }
 
-func newRopeBridge() *ropeBridge {
+func newRopeBridge(knots int) *ropeBridge {
 	initialPosition := position{0, 0}
+
+	knotsPosition := make([]position, 0, knots)
+	for i := 0; i < knots; i++ {
+		knotsPosition = append(knotsPosition, initialPosition)
+	}
 
 	tailVisitedPositions := util.Set[position]{}
 	tailVisitedPositions.Add(initialPosition)
 
 	return &ropeBridge{
-		headPosition:         initialPosition,
-		tailPosition:         initialPosition,
-		tailVisitedPositions: util.Set[position]{},
+		knotsPosition:        knotsPosition,
+		tailVisitedPositions: tailVisitedPositions,
 	}
 }
 
 func (r *ropeBridge) runSimulation(motions []motion) {
 	for _, motion := range motions {
 		for i := 0; i < motion.steps; i++ {
-			r.headPosition.move(motion.direction)
-			r.updateTailPosition()
-			r.tailVisitedPositions.Add(r.tailPosition)
+			r.knotsPosition[0].move(motion.direction)
+			for j := 1; j < len(r.knotsPosition); j++ {
+				r.knotsPosition[j].follow(r.knotsPosition[j-1])
+			}
+			r.tailVisitedPositions.Add(r.knotsPosition[len(r.knotsPosition)-1])
 		}
 	}
 }
 
 func (r *ropeBridge) totalTailVisitedPositions() int {
 	return len(r.tailVisitedPositions)
-}
-
-func (r *ropeBridge) updateTailPosition() {
-	r.tailPosition.follow(r.headPosition)
 }
 
 func (p *position) move(direction direction) {
