@@ -1,4 +1,4 @@
-package dayXX
+package day11
 
 // Day holds the data needed to solve part one and part two
 type Day struct {
