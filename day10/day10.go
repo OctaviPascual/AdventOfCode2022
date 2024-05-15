@@ -36,7 +36,6 @@ type cpu struct {
 type execution map[int]int
 
 type crt struct {
-	sprite int
 	pixels [6][40]rune
 }
 
