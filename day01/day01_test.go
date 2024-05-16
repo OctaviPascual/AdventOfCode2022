@@ -1,34 +1,11 @@
 package day01
 
 import (
-	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-func Test1(t *testing.T) {
-	input := `1000
-2000
-3000
-
-4000
-
-5000
-6000
-
-7000
-8000
-9000
-
-10000`
-	a := strings.Split(input, "\n")
-	for _, e := range a {
-		fmt.Printf("%q\n", e)
-	}
-}
 
 func TestNewDay(t *testing.T) {
 	expected := &Day{

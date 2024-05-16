@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"golang.org/x/exp/slices"
 )
 
 // Day holds the data needed to solve part one and part two
@@ -97,6 +99,5 @@ func maxCalories(elves []elf) (int, int) {
 }
 
 func removeElf(elves []elf, i int) []elf {
-	elves[i] = elves[len(elves)-1]
-	return elves[:len(elves)-1]
+	return slices.Delete(elves, i, i+1)
 }
