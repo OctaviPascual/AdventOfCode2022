@@ -14,8 +14,6 @@ type Day struct {
 }
 
 var (
-	// Regex matching a line of the form "Monkey 0:"
-	monkeyRe = regexp.MustCompile(`^Monkey (\d+):$`)
 	// Regex matching a line of the form "  Starting items: 79, 98"
 	startingItemsRe = regexp.MustCompile(`^  Starting items: (.*)$`)
 	// Regex matching a line of the form "  Operation: new = old * 19"
