@@ -63,3 +63,21 @@ func TestMinShould(t *testing.T) {
 		assert.Equal(t, 23.0, Min(math.NaN(), 23.0))
 	})
 }
+
+func TestSetShould(t *testing.T) {
+	t.Run("work with integer values", func(t *testing.T) {
+		s := NewSet(1, 2)
+		s.Add(4)
+
+		assert.True(t, s.Contains(1))
+		assert.True(t, s.Contains(2))
+		assert.True(t, s.Contains(4))
+		assert.False(t, s.Contains(3))
+	})
+
+	t.Run("work with string values", func(t *testing.T) {
+		s := NewSet("a", "b")
+
+		assert.ElementsMatch(t, []string{"a", "b"}, s.Members())
+	})
+}
