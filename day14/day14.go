@@ -42,41 +42,36 @@ func NewDay(input string) (*Day, error) {
 // SolvePartOne solves part one
 func (d Day) SolvePartOne() (string, error) {
 	d.pourSand()
-	unitsOfRestingSand := d.getUnitsOfRestingSand()
+	unitsOfRestingSand := getUnitsOfRestingSand(d.cave)
 	return fmt.Sprintf("%d", unitsOfRestingSand), nil
 }
 
 // SolvePartTwo solves part two
 func (d Day) SolvePartTwo() (string, error) {
-	//d.addFloor()
 	d.pourSandWithFloor()
-	unitsOfRestingSand := d.getUnitsOfRestingSand()
+	unitsOfRestingSand := getUnitsOfRestingSand(d.cave)
 	return fmt.Sprintf("%d", unitsOfRestingSand), nil
 }
 
 func parsePaths(pathsString []string) (map[position]material, error) {
 	cave := make(map[position]material)
-
 	for _, pathString := range pathsString {
 		err := parsePath(cave, pathString)
 		if err != nil {
 			return nil, fmt.Errorf("coud not parse path: %w", err)
 		}
 	}
-
 	return cave, nil
 }
 
 func parsePath(cave map[position]material, pathString string) error {
 	positionString := strings.Split(pathString, " -> ")
-
 	for i := 0; i < len(positionString)-1; i++ {
 		err := parseLineOfRock(cave, positionString[i], positionString[i+1])
 		if err != nil {
 			return fmt.Errorf("coud not parse line of rock: %w", err)
 		}
 	}
-
 	return nil
 }
 
@@ -133,11 +128,12 @@ func parsePosition(positionString string) (position, error) {
 }
 
 func (d Day) pourSand() {
-	maxY := d.getMaxY()
+	maxY := getMaxY(d.cave)
 	sandPosition := sandSource
 	for !isFlowingIntoAbyss(sandPosition, maxY) {
-		nextPosition := d.fall(sandPosition)
+		nextPosition := fall(sandPosition, d.cave)
 		if nextPosition == sandPosition {
+			d.cave[sandPosition] = sand
 			sandPosition = sandSource
 			continue
 		}
@@ -146,16 +142,12 @@ func (d Day) pourSand() {
 }
 
 func (d Day) pourSandWithFloor() {
-	maxY := d.getMaxY()
+	maxY := getMaxY(d.cave)
 	sandPosition := sandSource
 	for d.cave[sandSource] != sand {
-		if hasReachedFloor(sandPosition, maxY) {
+		nextPosition := fall(sandPosition, d.cave)
+		if hasReachedFloor(nextPosition, maxY) || nextPosition == sandPosition {
 			d.cave[sandPosition] = sand
-			sandPosition = sandSource
-			continue
-		}
-		nextPosition := d.fall(sandPosition)
-		if nextPosition == sandPosition {
 			sandPosition = sandSource
 			continue
 		}
@@ -163,33 +155,36 @@ func (d Day) pourSandWithFloor() {
 	}
 }
 
-func (d Day) getMaxY() int {
+func fall(sandPosition position, cave map[position]material) position {
+	down := position{x: sandPosition.x, y: sandPosition.y + 1}
+	if _, ok := cave[down]; !ok {
+		return down
+	}
+
+	downLeft := position{x: sandPosition.x - 1, y: sandPosition.y + 1}
+	if _, ok := cave[downLeft]; !ok {
+		return downLeft
+	}
+
+	downRight := position{x: sandPosition.x + 1, y: sandPosition.y + 1}
+	if _, ok := cave[downRight]; !ok {
+		return downRight
+	}
+
+	return sandPosition
+}
+
+func getMaxY(cave map[position]material) int {
 	maxY := math.MinInt
-	for position := range d.cave {
+	for position := range cave {
 		maxY = max(maxY, position.y)
 	}
 	return maxY
 }
 
-func (d Day) getMaxX() int {
-	maxX := math.MinInt
-	for position := range d.cave {
-		maxX = max(maxX, position.x)
-	}
-	return maxX
-}
-
-func (d Day) getMinX() int {
-	minX := math.MaxInt
-	for position := range d.cave {
-		minX = min(minX, position.x)
-	}
-	return minX
-}
-
-func (d Day) getUnitsOfRestingSand() int {
+func getUnitsOfRestingSand(cave map[position]material) int {
 	unitsOfRestingSand := 0
-	for _, m := range d.cave {
+	for _, m := range cave {
 		if m == sand {
 			unitsOfRestingSand++
 		}
@@ -202,25 +197,5 @@ func isFlowingIntoAbyss(sandPosition position, maxY int) bool {
 }
 
 func hasReachedFloor(sandPosition position, maxY int) bool {
-	return sandPosition.y == maxY+1
-}
-
-func (d Day) fall(sandPosition position) position {
-	down := position{x: sandPosition.x, y: sandPosition.y + 1}
-	if _, ok := d.cave[down]; !ok {
-		return down
-	}
-
-	downLeft := position{x: sandPosition.x - 1, y: sandPosition.y + 1}
-	if _, ok := d.cave[downLeft]; !ok {
-		return downLeft
-	}
-
-	downRight := position{x: sandPosition.x + 1, y: sandPosition.y + 1}
-	if _, ok := d.cave[downRight]; !ok {
-		return downRight
-	}
-
-	d.cave[sandPosition] = sand
-	return sandPosition
+	return sandPosition.y == maxY+2
 }
