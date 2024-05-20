@@ -80,4 +80,13 @@ func TestSetShould(t *testing.T) {
 
 		assert.ElementsMatch(t, []string{"a", "b"}, s.Members())
 	})
+
+	t.Run("work with rune values", func(t *testing.T) {
+		s := NewSet('a', 'b')
+		s.Remove('a')
+		s.Remove('c')
+
+		assert.False(t, s.Contains('a'))
+		assert.True(t, s.Contains('b'))
+	})
 }

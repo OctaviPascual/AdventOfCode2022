@@ -47,6 +47,13 @@ func (s Set[E]) Add(values ...E) {
 	}
 }
 
+// Remove removes an element from the set
+func (s Set[E]) Remove(values ...E) {
+	for _, v := range values {
+		delete(s, v)
+	}
+}
+
 // Contains returns true if the value is in the set
 func (s Set[E]) Contains(v E) bool {
 	_, ok := s[v]
