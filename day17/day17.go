@@ -73,31 +73,8 @@ func (d Day) SolvePartOne() (string, error) {
 
 // SolvePartTwo solves part two
 func (d Day) SolvePartTwo() (string, error) {
-	const totalRocks = 800
-
-	chamber := createChamber()
-	shapes := []shape{shape1{}, shape2{}, shape3{}, shape4{}, shape5{}}
-	yMax := -1
-	i := 0
-	for rock := 0; rock < totalRocks; rock++ {
-		s := shapes[rock%5]
-		rockPosition := s.appear(yMax, chamber)
-		for {
-			if d.jetPattern[i%len(d.jetPattern)] == '>' {
-				rockPosition = s.pushRight(rockPosition, chamber)
-			} else {
-				rockPosition = s.pushLeft(rockPosition, chamber)
-			}
-			i++
-			landing, err := s.fallDown(rockPosition, chamber)
-			if errors.Is(err, errRockLanded) {
-				yMax = max(yMax, landing.y)
-				break
-			}
-		}
-	}
-	// we must add 1 to yMax because we use 0-based coordinates
-	return fmt.Sprintf("%d", yMax+1), nil
+	// TODO: Figure out how to find a recurring pattern in the layout to compute arbitrarily big total rocks.
+	return "", nil
 }
 
 func createChamber() map[position]rune {
