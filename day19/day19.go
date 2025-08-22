@@ -12,6 +12,11 @@ type Day struct {
 	blueprints []blueprint
 }
 
+const (
+	totalMinutesPartOne = 24
+	totalMinutesPartTwo = 32
+)
+
 var (
 	// Regex matching a blueprint such as "Blueprint 12: Each ore robot costs 4 ore. Each clay robot costs 4 ore. Each obsidian robot costs 3 ore and 7 clay. Each geode robot costs 4 ore and 20 obsidian."
 	blueprintRe = regexp.MustCompile(`^Blueprint (\d+): Each ore robot costs (\d+) ore. Each clay robot costs (\d+) ore. Each obsidian robot costs (\d+) ore and (\d+) clay. Each geode robot costs (\d+) ore and (\d+) obsidian.$`)
@@ -53,16 +58,41 @@ func (d Day) SolvePartOne() (string, error) {
 			oreRobots: 1,
 		}
 		maxGeodes := 0
-		rec(state, &maxGeodes)
+		explore(state, totalMinutesPartOne, &maxGeodes)
 		qualityLevelsSum += blueprint.qualityLevel(maxGeodes)
 	}
 
 	return fmt.Sprintf("%d", qualityLevelsSum), nil
+
 }
 
 // SolvePartTwo solves part two
 func (d Day) SolvePartTwo() (string, error) {
-	return "", nil
+	state1 := state{
+		blueprint: d.blueprints[0],
+		minute:    1,
+		oreRobots: 1,
+	}
+	maxGeodesBlueprint1 := 0
+	explore(state1, totalMinutesPartTwo, &maxGeodesBlueprint1)
+
+	state2 := state{
+		blueprint: d.blueprints[1],
+		minute:    1,
+		oreRobots: 1,
+	}
+	maxGeodesBlueprint2 := 0
+	explore(state2, totalMinutesPartTwo, &maxGeodesBlueprint2)
+
+	state3 := state{
+		blueprint: d.blueprints[2],
+		minute:    1,
+		oreRobots: 1,
+	}
+	maxGeodesBlueprint3 := 0
+	explore(state3, totalMinutesPartTwo, &maxGeodesBlueprint3)
+
+	return fmt.Sprintf("%d", maxGeodesBlueprint1*maxGeodesBlueprint2*maxGeodesBlueprint3), nil
 }
 
 func parseBlueprints(blueprintsString []string) ([]blueprint, error) {
@@ -120,8 +150,6 @@ type state struct {
 type action string
 
 const (
-	totalMinutes = 24
-
 	oreRobot      action = "oreRobot"
 	clayRobot     action = "clayRobot"
 	obsidianRobot action = "obsidianRobot"
@@ -133,7 +161,7 @@ func (b blueprint) qualityLevel(geodes int) int {
 	return b.ID * geodes
 }
 
-func rec(state state, maxGeodes *int) {
+func explore(state state, totalMinutes int, maxGeodes *int) {
 	if state.minute > totalMinutes {
 		if state.geodes > *maxGeodes {
 			*maxGeodes = state.geodes
@@ -141,21 +169,21 @@ func rec(state state, maxGeodes *int) {
 		return
 	}
 
-	if maxBoundOfGeodes(state) <= *maxGeodes {
+	if maxBoundOfGeodes(state, totalMinutes) <= *maxGeodes {
 		return
 	}
 
-	actions := getActions(state)
+	actions := getActions(state, totalMinutes)
 
 	state2 := collectResources(state)
 
 	for _, action := range actions {
 		state3 := executeAction(state2, action)
-		rec(state3, maxGeodes)
+		explore(state3, totalMinutes, maxGeodes)
 	}
 }
 
-func getActions(s state) []action {
+func getActions(s state, totalMinutes int) []action {
 	if s.minute == totalMinutes {
 		// Last action doesn't matter so let's always do this one.
 		return []action{noRobot}
@@ -239,7 +267,7 @@ func executeAction(s state, action action) state {
 	return newState
 }
 
-func maxBoundOfGeodes(s state) int {
+func maxBoundOfGeodes(s state, totalMinutes int) int {
 	maxBound := s.geodes
 	geodeRobots := s.geodeRobots
 	for i := s.minute; i <= totalMinutes; i++ {

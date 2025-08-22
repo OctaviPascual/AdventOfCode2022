@@ -61,10 +61,34 @@ func TestSolvePartOne(t *testing.T) {
 }
 
 func TestSolvePartTwo(t *testing.T) {
-	day := &Day{}
+	day := &Day{
+		blueprints: []blueprint{
+			{
+				ID:                1,
+				oreRobotCost:      robotCost{ore: 4},
+				clayRobotCost:     robotCost{ore: 2},
+				obsidianRobotCost: robotCost{ore: 3, clay: 14},
+				geodeRobotCost:    robotCost{ore: 2, obsidian: 7},
+			},
+			{
+				ID:                2,
+				oreRobotCost:      robotCost{ore: 2},
+				clayRobotCost:     robotCost{ore: 3},
+				obsidianRobotCost: robotCost{ore: 3, clay: 8},
+				geodeRobotCost:    robotCost{ore: 3, obsidian: 12},
+			},
+			{
+				ID:                3,
+				oreRobotCost:      robotCost{ore: 4},
+				clayRobotCost:     robotCost{ore: 2},
+				obsidianRobotCost: robotCost{ore: 3, clay: 14},
+				geodeRobotCost:    robotCost{ore: 2, obsidian: 7},
+			},
+		},
+	}
 
 	answer, err := day.SolvePartTwo()
 	require.NoError(t, err)
 
-	assert.Equal(t, "", answer)
+	assert.Equal(t, "194432", answer)
 }
