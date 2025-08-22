@@ -49,10 +49,11 @@ func (d Day) SolvePartOne() (string, error) {
 	for _, blueprint := range d.blueprints {
 		state := state{
 			blueprint: blueprint,
+			minute:    1,
 			oreRobots: 1,
 		}
 		maxGeodes := 0
-		rec(state, 1, &maxGeodes)
+		rec(state, &maxGeodes)
 		qualityLevelsSum += blueprint.qualityLevel(maxGeodes)
 	}
 
@@ -102,6 +103,8 @@ func parseBlueprint(blueprintString string) (blueprint, error) {
 type state struct {
 	blueprint blueprint
 
+	minute int
+
 	ore      int
 	clay     int
 	obsidian int
@@ -130,30 +133,30 @@ func (b blueprint) qualityLevel(geodes int) int {
 	return b.ID * geodes
 }
 
-func rec(state state, minute int, maxGeodes *int) {
-	if minute > totalMinutes {
+func rec(state state, maxGeodes *int) {
+	if state.minute > totalMinutes {
 		if state.geodes > *maxGeodes {
 			*maxGeodes = state.geodes
 		}
 		return
 	}
 
-	if maxBoundOfGeodes(minute, state.geodes, state.geodeRobots) <= *maxGeodes {
+	if maxBoundOfGeodes(state) <= *maxGeodes {
 		return
 	}
 
-	actions := getActions(state, minute)
+	actions := getActions(state)
 
 	state2 := collectResources(state)
 
 	for _, action := range actions {
 		state3 := executeAction(state2, action)
-		rec(state3, minute+1, maxGeodes)
+		rec(state3, maxGeodes)
 	}
 }
 
-func getActions(state state, minute int) []action {
-	if minute == totalMinutes {
+func getActions(s state) []action {
+	if s.minute == totalMinutes {
 		// Last action doesn't matter so let's always do this one.
 		return []action{noRobot}
 	}
@@ -161,22 +164,22 @@ func getActions(state state, minute int) []action {
 	possibleActions := []action{noRobot}
 
 	// If we build more ore robots than maxOre we will be wasting resources on each minute.
-	maxOre := max(state.blueprint.oreRobotCost.ore, state.blueprint.clayRobotCost.ore, state.blueprint.obsidianRobotCost.ore, state.blueprint.geodeRobotCost.ore)
-	if state.ore >= state.blueprint.oreRobotCost.ore && state.oreRobots < maxOre {
+	maxOre := max(s.blueprint.oreRobotCost.ore, s.blueprint.clayRobotCost.ore, s.blueprint.obsidianRobotCost.ore, s.blueprint.geodeRobotCost.ore)
+	if s.ore >= s.blueprint.oreRobotCost.ore && s.oreRobots < maxOre {
 		possibleActions = append(possibleActions, oreRobot)
 	}
 
 	// If we build more clay robots than maxClay we will be wasting resources on each minute.
-	maxClay := state.blueprint.obsidianRobotCost.clay
-	if state.ore >= state.blueprint.clayRobotCost.ore && state.clayRobots < maxClay {
+	maxClay := s.blueprint.obsidianRobotCost.clay
+	if s.ore >= s.blueprint.clayRobotCost.ore && s.clayRobots < maxClay {
 		possibleActions = append(possibleActions, clayRobot)
 	}
 
-	if state.ore >= state.blueprint.obsidianRobotCost.ore && state.clay >= state.blueprint.obsidianRobotCost.clay {
+	if s.ore >= s.blueprint.obsidianRobotCost.ore && s.clay >= s.blueprint.obsidianRobotCost.clay {
 		possibleActions = append(possibleActions, obsidianRobot)
 	}
 
-	if state.ore >= state.blueprint.geodeRobotCost.ore && state.obsidian >= state.blueprint.geodeRobotCost.obsidian {
+	if s.ore >= s.blueprint.geodeRobotCost.ore && s.obsidian >= s.blueprint.geodeRobotCost.obsidian {
 		// Building a geode robot will always provide more geodes than performing any other action.
 		return []action{geodeRobot}
 	}
@@ -186,6 +189,8 @@ func getActions(state state, minute int) []action {
 func collectResources(s state) state {
 	return state{
 		blueprint: s.blueprint,
+
+		minute: s.minute,
 
 		ore:      s.ore + s.oreRobots,
 		clay:     s.clay + s.clayRobots,
@@ -202,6 +207,8 @@ func collectResources(s state) state {
 func executeAction(s state, action action) state {
 	newState := state{
 		blueprint: s.blueprint,
+
+		minute: s.minute + 1,
 
 		ore:      s.ore,
 		clay:     s.clay,
@@ -232,9 +239,10 @@ func executeAction(s state, action action) state {
 	return newState
 }
 
-func maxBoundOfGeodes(minute, geodes, geodeRobots int) int {
-	maxBound := geodes
-	for i := minute; i <= totalMinutes; i++ {
+func maxBoundOfGeodes(s state) int {
+	maxBound := s.geodes
+	geodeRobots := s.geodeRobots
+	for i := s.minute; i <= totalMinutes; i++ {
 		maxBound += geodeRobots
 		geodeRobots++
 	}
