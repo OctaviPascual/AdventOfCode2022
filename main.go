@@ -156,6 +156,7 @@ var days = []struct {
 func main() {
 	for i, day := range days {
 		fmt.Printf("\nRunning day %d\n", i+1)
+
 		bytes, err := os.ReadFile(day.filename)
 		if err != nil {
 			log.Fatalf("could not read file %s: %v", day.filename, err)
@@ -173,6 +174,12 @@ func main() {
 			log.Fatalf("could not solve part one for day %d: %v", i+1, err)
 		}
 		fmt.Printf("Part One: %s\n", answer)
+
+		// Disable part two of day 19
+		if i+1 == 19 {
+			fmt.Printf("Part Two: [DISABLED] It takes ~5min to run\n")
+			continue
+		}
 
 		answer, err = day.SolvePartTwo()
 		if err != nil {

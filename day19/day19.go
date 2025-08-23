@@ -52,45 +52,24 @@ func NewDay(input string) (*Day, error) {
 func (d Day) SolvePartOne() (string, error) {
 	qualityLevelsSum := 0
 	for _, blueprint := range d.blueprints {
-		state := state{
-			blueprint: blueprint,
-			minute:    1,
-			oreRobots: 1,
-		}
 		maxGeodes := 0
-		explore(state, totalMinutesPartOne, &maxGeodes)
+		explore(newState(blueprint), totalMinutesPartOne, &maxGeodes)
 		qualityLevelsSum += blueprint.qualityLevel(maxGeodes)
 	}
-
 	return fmt.Sprintf("%d", qualityLevelsSum), nil
 
 }
 
 // SolvePartTwo solves part two
 func (d Day) SolvePartTwo() (string, error) {
-	state1 := state{
-		blueprint: d.blueprints[0],
-		minute:    1,
-		oreRobots: 1,
-	}
 	maxGeodesBlueprint1 := 0
-	explore(state1, totalMinutesPartTwo, &maxGeodesBlueprint1)
+	explore(newState(d.blueprints[0]), totalMinutesPartTwo, &maxGeodesBlueprint1)
 
-	state2 := state{
-		blueprint: d.blueprints[1],
-		minute:    1,
-		oreRobots: 1,
-	}
 	maxGeodesBlueprint2 := 0
-	explore(state2, totalMinutesPartTwo, &maxGeodesBlueprint2)
+	explore(newState(d.blueprints[1]), totalMinutesPartTwo, &maxGeodesBlueprint2)
 
-	state3 := state{
-		blueprint: d.blueprints[2],
-		minute:    1,
-		oreRobots: 1,
-	}
 	maxGeodesBlueprint3 := 0
-	explore(state3, totalMinutesPartTwo, &maxGeodesBlueprint3)
+	explore(newState(d.blueprints[2]), totalMinutesPartTwo, &maxGeodesBlueprint3)
 
 	return fmt.Sprintf("%d", maxGeodesBlueprint1*maxGeodesBlueprint2*maxGeodesBlueprint3), nil
 }
@@ -157,6 +136,14 @@ const (
 	noRobot       action = "noRobot"
 )
 
+func newState(blueprint blueprint) state {
+	return state{
+		blueprint: blueprint,
+		minute:    1,
+		oreRobots: 1,
+	}
+}
+
 func (b blueprint) qualityLevel(geodes int) int {
 	return b.ID * geodes
 }
@@ -189,29 +176,37 @@ func getActions(s state, totalMinutes int) []action {
 		return []action{noRobot}
 	}
 
-	possibleActions := []action{noRobot}
+	actions := []action{noRobot}
 
 	// If we build more ore robots than maxOre we will be wasting resources on each minute.
 	maxOre := max(s.blueprint.oreRobotCost.ore, s.blueprint.clayRobotCost.ore, s.blueprint.obsidianRobotCost.ore, s.blueprint.geodeRobotCost.ore)
 	if s.ore >= s.blueprint.oreRobotCost.ore && s.oreRobots < maxOre {
-		possibleActions = append(possibleActions, oreRobot)
+		actions = append(actions, oreRobot)
 	}
 
 	// If we build more clay robots than maxClay we will be wasting resources on each minute.
 	maxClay := s.blueprint.obsidianRobotCost.clay
 	if s.ore >= s.blueprint.clayRobotCost.ore && s.clayRobots < maxClay {
-		possibleActions = append(possibleActions, clayRobot)
+		actions = append(actions, clayRobot)
 	}
 
-	if s.ore >= s.blueprint.obsidianRobotCost.ore && s.clay >= s.blueprint.obsidianRobotCost.clay {
-		possibleActions = append(possibleActions, obsidianRobot)
+	// If we build more obsidian robots than maxObsidian we will be wasting resources on each minute.
+	maxObsidian := s.blueprint.geodeRobotCost.obsidian
+	if s.ore >= s.blueprint.obsidianRobotCost.ore && s.clay >= s.blueprint.obsidianRobotCost.clay && s.obsidianRobots < maxObsidian {
+		actions = append(actions, obsidianRobot)
 	}
 
 	if s.ore >= s.blueprint.geodeRobotCost.ore && s.obsidian >= s.blueprint.geodeRobotCost.obsidian {
 		// Building a geode robot will always provide more geodes than performing any other action.
 		return []action{geodeRobot}
 	}
-	return possibleActions
+
+	// If it's possible to build any robot, it's better to build one than none.
+	if len(actions) == 4 {
+		return []action{oreRobot, clayRobot, obsidianRobot}
+	}
+
+	return actions
 }
 
 func collectResources(s state) state {
@@ -268,11 +263,28 @@ func executeAction(s state, action action) state {
 }
 
 func maxBoundOfGeodes(s state, totalMinutes int) int {
+	// If we have no obsidian robots we are minutes away from building geode robots.
+	// Note that this assumes that geode robots cost obsidian.
+	if s.obsidianRobots == 0 {
+		maxBound, geodeRobots := 0, 0
+		// We won't be able to start building a geode robot at least until 5 minutes later.
+		// Note that this is empirical from the input we have.
+		for i := s.minute + 5; i <= totalMinutes; i++ {
+			maxBound += geodeRobots
+			geodeRobots++
+		}
+		return maxBound
+	}
+
 	maxBound := s.geodes
 	geodeRobots := s.geodeRobots
+	canBuildGeodeRobotThisMinute := s.ore >= s.blueprint.geodeRobotCost.ore && s.obsidian >= s.blueprint.geodeRobotCost.obsidian
+
 	for i := s.minute; i <= totalMinutes; i++ {
 		maxBound += geodeRobots
-		geodeRobots++
+		if i > s.minute || canBuildGeodeRobotThisMinute {
+			geodeRobots++
+		}
 	}
 	return maxBound
 }
