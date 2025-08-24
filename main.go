@@ -26,6 +26,7 @@ import (
 	"github.com/OctaviPascual/AdventOfCode2022/day18"
 	"github.com/OctaviPascual/AdventOfCode2022/day19"
 	"github.com/OctaviPascual/AdventOfCode2022/day20"
+	"github.com/OctaviPascual/AdventOfCode2022/day21"
 )
 
 // Day is the interface that wraps SolvePartOne and SolvePartTwo methods
@@ -158,11 +159,22 @@ var days = []struct {
 			return day20.NewDay(input)
 		},
 	},
+	{
+		filename: "./day21/day21.txt",
+		constructor: func(input string) (Day, error) {
+			return day21.NewDay(input)
+		},
+	},
 }
 
 func main() {
 	for i, day := range days {
 		fmt.Printf("\nRunning day %d\n", i+1)
+
+		if i+1 == 19 {
+			fmt.Printf("[DISABLED] It takes ~5min to run\n")
+			continue
+		}
 
 		bytes, err := os.ReadFile(day.filename)
 		if err != nil {
@@ -181,12 +193,6 @@ func main() {
 			log.Fatalf("could not solve part one for day %d: %v", i+1, err)
 		}
 		fmt.Printf("Part One: %s\n", answer)
-
-		// Disable part two of day 19
-		if i+1 == 19 {
-			fmt.Printf("Part Two: [DISABLED] It takes ~5min to run\n")
-			continue
-		}
 
 		answer, err = day.SolvePartTwo()
 		if err != nil {

@@ -268,7 +268,7 @@ func maxBoundOfGeodes(s state, totalMinutes int) int {
 	if s.obsidianRobots == 0 {
 		maxBound, geodeRobots := 0, 0
 		// We won't be able to start building a geode robot at least until 5 minutes later.
-		// Note that this is empirical from the input we have.
+		// Note that this value of 5 is empirical from the input we have, with lower obsidian costs it could be less.
 		for i := s.minute + 5; i <= totalMinutes; i++ {
 			maxBound += geodeRobots
 			geodeRobots++
