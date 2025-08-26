@@ -82,7 +82,7 @@ func TestSolvePartOne(t *testing.T) {
 	answer, err := day.SolvePartOne()
 	require.NoError(t, err)
 
-	assert.Equal(t, "", answer)
+	assert.Equal(t, "6032", answer)
 }
 
 func TestSolvePartTwo(t *testing.T) {
