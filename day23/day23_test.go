@@ -72,3 +72,29 @@ func TestSolvePartTwo(t *testing.T) {
 
 	assert.Equal(t, "20", answer)
 }
+
+func TestAdjacentPositions(t *testing.T) {
+	e := elf{position: position{i: 10, j: 5}}
+
+	expectedAdjacentPositions := []position{
+		{i: 9, j: 4},
+		{i: 9, j: 5},
+		{i: 9, j: 6},
+		{i: 10, j: 4},
+		{i: 10, j: 6},
+		{i: 11, j: 4},
+		{i: 11, j: 5},
+		{i: 11, j: 6},
+	}
+	assert.ElementsMatch(t, expectedAdjacentPositions, e.adjacentPositions())
+
+	var d direction
+	d = north
+
+	expectedAdjacentPositions = []position{
+		{i: 9, j: 4},
+		{i: 9, j: 5},
+		{i: 9, j: 6},
+	}
+	assert.ElementsMatch(t, expectedAdjacentPositions, d.adjacentPositions(position{i: 10, j: 5}))
+}

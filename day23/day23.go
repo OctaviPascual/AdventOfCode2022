@@ -96,12 +96,15 @@ func (g *grove) executeRound() int {
 }
 
 func (g *grove) executeFirstHalf() map[position][]*elf {
+	elvesPositions := util.NewSet[position]()
+	for _, elf := range g.elves {
+		elvesPositions.Add(elf.position)
+	}
+
 	proposedPositions := make(map[position][]*elf)
 	for _, elf := range g.elves {
-		proposedPosition := elf.proposePosition(g.elves, g.directions)
-		if proposedPosition != nil {
-			proposedPositions[*proposedPosition] = append(proposedPositions[*proposedPosition], elf)
-		}
+		proposedPosition := elf.proposePosition(elvesPositions, g.directions)
+		proposedPositions[proposedPosition] = append(proposedPositions[proposedPosition], elf)
 	}
 	return proposedPositions
 }
@@ -109,7 +112,7 @@ func (g *grove) executeFirstHalf() map[position][]*elf {
 func (g *grove) executeSecondHalf(proposedPositions map[position][]*elf) int {
 	moves := 0
 	for p, elves := range proposedPositions {
-		if len(elves) == 1 {
+		if len(elves) == 1 && elves[0].position != p {
 			elves[0].position = p
 			moves++
 		}
@@ -118,7 +121,7 @@ func (g *grove) executeSecondHalf(proposedPositions map[position][]*elf) int {
 }
 
 func (g *grove) rotateListOfDirections() {
-	g.directions = append(g.directions[1:4], g.directions[0])
+	g.directions = append(g.directions[1:], g.directions[0])
 }
 
 func (g *grove) emptyGroundTiles() int {
@@ -129,40 +132,38 @@ func (g *grove) emptyGroundTiles() int {
 	return (maxI-minI+1)*(maxJ-minJ+1) - len(g.elves)
 }
 
-func (e *elf) proposePosition(elves []*elf, directions []direction) *position {
-	adjacentPositions := e.getAdjacentPositions()
-	adjacentElvesPositions := e.getAdjacentElvesPositions(adjacentPositions, elves)
+func (e *elf) proposePosition(elvesPositions util.Set[position], directions []direction) position {
+	adjacentElvesPositions := e.adjacentElvesPositions(elvesPositions)
 
 	if len(adjacentElvesPositions) == 0 {
-		return nil
+		return e.position
 	}
 
-	for _, d := range directions {
-		noElves := true
-		for _, p := range d.adjacentPositions(e.position) {
+	for _, direction := range directions {
+		adjacentElves := false
+		for _, p := range direction.adjacentPositions(e.position) {
 			if adjacentElvesPositions.Contains(p) {
-				noElves = false
+				adjacentElves = true
 				break
 			}
 		}
-		if noElves {
-			proposedPosition := d.move(e.position)
-			return &proposedPosition
+		if !adjacentElves {
+			return direction.move(e.position)
 		}
 	}
-	return nil
+	return e.position
 }
 
 func (d direction) move(p position) position {
 	switch d {
 	case north:
-		return position{p.i - 1, p.j}
+		return position{i: p.i - 1, j: p.j}
 	case south:
-		return position{p.i + 1, p.j}
+		return position{i: p.i + 1, j: p.j}
 	case west:
-		return position{p.i, p.j - 1}
+		return position{i: p.i, j: p.j - 1}
 	case east:
-		return position{p.i, p.j + 1}
+		return position{i: p.i, j: p.j + 1}
 	}
 	panic("BUG! invalid position")
 }
@@ -181,24 +182,26 @@ func (d direction) adjacentPositions(p position) []position {
 	return nil
 }
 
-func (e *elf) getAdjacentPositions() util.Set[position] {
-	adjacentPositions := util.NewSet[position]()
+func (e *elf) adjacentPositions() []position {
+	adjacentPositions := make([]position, 0, 8)
 	for i := -1; i <= 1; i++ {
 		for j := -1; j <= 1; j++ {
 			p := position{i: e.position.i + i, j: e.position.j + j}
 			if p != e.position {
-				adjacentPositions.Add(p)
+				adjacentPositions = append(adjacentPositions, p)
 			}
 		}
 	}
 	return adjacentPositions
 }
 
-func (e *elf) getAdjacentElvesPositions(positions util.Set[position], elves []*elf) util.Set[position] {
+func (e *elf) adjacentElvesPositions(elvesPositions util.Set[position]) util.Set[position] {
+	adjacentPositions := e.adjacentPositions()
+
 	adjacentElvesPositions := util.NewSet[position]()
-	for _, e := range elves {
-		if positions.Contains(e.position) {
-			adjacentElvesPositions.Add(e.position)
+	for _, p := range adjacentPositions {
+		if elvesPositions.Contains(p) {
+			adjacentElvesPositions.Add(p)
 		}
 	}
 	return adjacentElvesPositions
