@@ -87,14 +87,80 @@ func TestAdjacentPositions(t *testing.T) {
 		{i: 11, j: 6},
 	}
 	assert.ElementsMatch(t, expectedAdjacentPositions, e.adjacentPositions())
+}
 
-	var d direction
-	d = north
-
-	expectedAdjacentPositions = []position{
-		{i: 9, j: 4},
-		{i: 9, j: 5},
-		{i: 9, j: 6},
+func TestDirectionsAdjacentPositionsShould(t *testing.T) {
+	tests := map[string]struct {
+		input    direction
+		expected []position
+	}{
+		"return N, NE, NW positions when direction is north": {
+			input: north,
+			expected: []position{
+				{i: 9, j: 4},
+				{i: 9, j: 5},
+				{i: 9, j: 6},
+			},
+		},
+		"return S, SE, SW positions when direction is south": {
+			input: south,
+			expected: []position{
+				{i: 11, j: 4},
+				{i: 11, j: 5},
+				{i: 11, j: 6},
+			},
+		},
+		"return W, NW, SW positions when direction is west": {
+			input: west,
+			expected: []position{
+				{i: 9, j: 4},
+				{i: 10, j: 4},
+				{i: 11, j: 4},
+			},
+		},
+		"return E, NE, SE positions when direction is east": {
+			input: east,
+			expected: []position{
+				{i: 9, j: 6},
+				{i: 10, j: 6},
+				{i: 11, j: 6},
+			},
+		},
 	}
-	assert.ElementsMatch(t, expectedAdjacentPositions, d.adjacentPositions(position{i: 10, j: 5}))
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, test.expected, test.input.adjacentPositions(position{i: 10, j: 5}))
+		})
+	}
+}
+
+func TestDirectionsMoveShould(t *testing.T) {
+	tests := map[string]struct {
+		input    direction
+		expected position
+	}{
+		"return N position when direction is north": {
+			input:    north,
+			expected: position{i: 9, j: 5},
+		},
+		"return S position when direction is south": {
+			input:    south,
+			expected: position{i: 11, j: 5},
+		},
+		"return W position when direction is west": {
+			input:    west,
+			expected: position{i: 10, j: 4},
+		},
+		"return E position when direction is east": {
+			input:    east,
+			expected: position{i: 10, j: 6},
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, test.expected, test.input.move(position{i: 10, j: 5}))
+		})
+	}
 }
