@@ -29,6 +29,7 @@ import (
 	"github.com/OctaviPascual/AdventOfCode2022/day21"
 	"github.com/OctaviPascual/AdventOfCode2022/day22"
 	"github.com/OctaviPascual/AdventOfCode2022/day23"
+	"github.com/OctaviPascual/AdventOfCode2022/day24"
 )
 
 // Day is the interface that wraps SolvePartOne and SolvePartTwo methods
@@ -179,6 +180,12 @@ var days = []struct {
 			return day23.NewDay(input)
 		},
 	},
+	{
+		filename: "./day24/day24.txt",
+		constructor: func(input string) (Day, error) {
+			return day24.NewDay(input)
+		},
+	},
 }
 
 func main() {
@@ -187,6 +194,11 @@ func main() {
 
 		if i+1 == 19 {
 			fmt.Printf("[DISABLED] It takes ~5min to run\n")
+			continue
+		}
+
+		if i+1 == 24 {
+			fmt.Printf("[DISABLED] Didn't manage to solve it\n")
 			continue
 		}
 

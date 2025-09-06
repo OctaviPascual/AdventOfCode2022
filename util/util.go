@@ -27,6 +27,14 @@ func Min[T constraints.Ordered](x, y T) T {
 	return y
 }
 
+// Abs returns the absolute value of x.
+func Abs[T constraints.Integer](x T) T {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
+
 // Set represents a set structure
 // Inspired from https://bitfieldconsulting.com/posts/generic-set
 type Set[E comparable] map[E]struct{}
